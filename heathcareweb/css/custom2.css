@@ -1,0 +1,76 @@
+body {
+    background-color: #faebd7
+}
+
+.links-and-photo {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.quick-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+H1 {
+    text-align: center;
+    text-decoration: underline;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+H2 {
+    text-align: center;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    background-color:#ffffff;
+    display: table;
+    margin: 0.35rem auto;
+    padding: 0.1rem 0.4rem;
+}
+ol {
+    font-style: italic;
+}
+ul {
+    font-style: normal;
+}
+.header {
+    background-color: #a9a9a9;
+    text-align: center;
+}
+
+.header h1,
+.header h2 {
+    background-color: #ffffff;
+    display: table;
+    margin: 0.35rem auto;
+    padding: 0.1rem 0.4rem;
+}
+
+.quick-links a {
+    display: inline-block;
+    padding: 0.45rem 0.8rem;
+    border: 1px solid #1f5f73;
+    border-radius: 6px;
+    background-color: #ffffff;
+    color: #1f5f73;
+    font-family: Georgia, "Times New Roman", Times, serif;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.quick-links a:hover,
+.quick-links a:focus-visible {
+    background-color: #1f5f73;
+    color: #ffffff;
+}
+
+.quick-links a:visited {
+    color: #27485a;
+}
+
+.profile-pic {
+    width: 120px;
+    height: auto;
+    border-radius: 8px;
+}

@@ -1,0 +1,159 @@
+/* Force a Times-style serif face across site text. */
+html,
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+a,
+button,
+input,
+textarea,
+select,
+label,
+li,
+span,
+small,
+strong,
+em,
+blockquote,
+figcaption,
+th,
+td {
+    font-family: "Crimson Pro", Georgia, "Times New Roman", serif !important;
+
+}
+
+/* Preserve icon fonts so Font Awesome glyphs continue to render. */
+.fa,
+.fas,
+.far,
+.fab,
+.fa-solid,
+.fa-regular,
+.fa-brands {
+    font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+}
+
+/* Global zoom-out effect so all visual elements appear smaller in-window. */
+:root {
+    --global-page-scale: 0.88;
+    --theme-amber: #008b8b;
+    --theme-amber-rgb: 0, 139, 139;
+    --theme-amber-dark: #006b6b;
+    --theme-amber-soft: #6dc9c9;
+    --theme-amber-soft-rgba: rgba(0, 139, 139, 0.25);
+
+    /* Bootstrap color tokens used across the base theme. */
+    --bs-yellow: var(--theme-amber);
+    --bs-primary: var(--theme-amber);
+    --bs-warning: var(--theme-amber);
+    --bs-primary-rgb: var(--theme-amber-rgb);
+    --bs-link-color: var(--theme-amber);
+    --bs-link-hover-color: var(--theme-amber-dark);
+}
+
+body {
+    zoom: var(--global-page-scale);
+}
+
+@supports not (zoom: 1) {
+    body {
+        transform: scale(var(--global-page-scale));
+        transform-origin: top left;
+        width: calc(100% / var(--global-page-scale));
+    }
+}
+
+/* Invert the Amazon white logo wherever it is used. */
+img[src$="amazonfullwhite.png"] {
+    filter: invert(1);
+}
+
+/* Tune individual client logo sizes without changing all brand logos. */
+.apple-logo {
+    height: 1.8rem;
+}
+
+.youtube-logo {
+    height: 3.6rem;
+}
+
+/* Replace hardcoded theme yellow accents with amber. */
+#mainNav .navbar-brand,
+#mainNav .navbar-nav .nav-item .nav-link.active,
+#mainNav .navbar-nav .nav-item .nav-link:hover,
+.link-primary,
+.link-warning {
+    color: var(--theme-amber) !important;
+}
+
+.link-primary:hover,
+.link-primary:focus,
+.link-warning:hover,
+.link-warning:focus {
+    color: var(--theme-amber-dark) !important;
+}
+
+.btn-primary {
+    background-color: var(--theme-amber) !important;
+    border-color: var(--theme-amber) !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active,
+.show > .btn-primary.dropdown-toggle {
+    background-color: var(--theme-amber-dark) !important;
+    border-color: var(--theme-amber-dark) !important;
+}
+
+.btn-primary:focus,
+.btn-primary:active {
+    box-shadow: 0 0 0 0.25rem var(--theme-amber-soft-rgba) !important;
+}
+
+.timeline > li .timeline-image {
+    background-color: var(--theme-amber) !important;
+}
+
+section#contact form#contactForm .form-control:focus {
+    border-color: var(--theme-amber) !important;
+    box-shadow: 0 0 0 0.25rem var(--theme-amber-soft-rgba);
+}
+
+.form-check-input:checked,
+.form-check-input[type="checkbox"]:indeterminate {
+    background-color: var(--theme-amber) !important;
+    border-color: var(--theme-amber) !important;
+}
+
+.form-range::-webkit-slider-thumb,
+.form-range::-moz-range-thumb {
+    background-color: var(--theme-amber) !important;
+}
+
+.form-check-input:focus {
+    border-color: var(--theme-amber-soft) !important;
+    box-shadow: 0 0 0 0.25rem var(--theme-amber-soft-rgba) !important;
+}
+
+#portfolio .portfolio-item .portfolio-link .portfolio-hover {
+    background: rgba(var(--theme-amber-rgb), 0.9) !important;
+}
+
+/* Keep masthead content stacked and centered at all viewport sizes. */
+header.masthead .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+header.masthead .btn {
+    margin-left: auto;
+    margin-right: auto;
+}

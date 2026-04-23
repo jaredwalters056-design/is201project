@@ -1,0 +1,699 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0e0c;--bg2:#1a1916;--bg3:#232220;--bg4:#2e2c29;
+  --border:#3a3835;--border2:#4a4845;
+  --text:#f0ede8;--text2:#a09d98;--text3:#6a6866;
+  --accent:#c8a96e;--accent2:#e8c990;--accent-dim:#5a4825;
+  --green:#4a8c5c;--green-light:#7ab88a;
+  --red:#8c4a4a;--red-light:#c47a7a;
+  --blue:#4a6a8c;--blue-light:#7aaac8;
+  --radius:8px;--radius-lg:12px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+h1,h2,h3,h4{font-family:'Playfair Display',serif}
+.mono{font-family:'DM Mono',monospace}
+.app{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;position:sticky;top:0}
+.sidebar-header{padding:20px;border-bottom:1px solid var(--border)}
+.sidebar-header h1{font-size:18px;color:var(--accent2);letter-spacing:-0.02em}
+.sidebar-header p{font-size:11px;color:var(--text3);margin-top:2px;letter-spacing:0.05em;text-transform:uppercase}
+.sidebar-section{padding:12px 16px 8px;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);flex-shrink:0}
+.exercise-list{flex:1;overflow-y:auto;padding-bottom:80px}
+.exercise-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--border);transition:background 0.15s}
+.exercise-item:hover{background:var(--bg3)}
+.ex-color{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ex-info{flex:1;min-width:0}
+.ex-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ex-meta{font-size:11px;color:var(--text3);margin-top:1px}
+.ex-bpm{font-family:'DM Mono',monospace;font-size:12px;color:var(--accent);font-weight:500;white-space:nowrap}
+.sidebar-footer{position:absolute;bottom:0;left:0;right:0;padding:12px 16px;background:var(--bg2);border-top:1px solid var(--border)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--radius);border:1px solid var(--border2);background:transparent;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.btn:hover{background:var(--bg3);border-color:var(--border2)}
+.btn.primary{background:var(--accent-dim);border-color:var(--accent);color:var(--accent2)}
+.btn.primary:hover{background:#6a5530}
+.btn.danger{border-color:var(--red);color:var(--red-light)}
+.btn.danger:hover{background:rgba(140,74,74,0.2)}
+.btn.sm{padding:5px 10px;font-size:12px}
+.btn-full{width:100%;justify-content:center}
+.main{overflow-y:auto;padding:24px}
+.main-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.main-header h2{font-size:22px;color:var(--text)}
+.week-nav{display:flex;align-items:center;gap:12px}
+.week-label{font-size:14px;color:var(--text2);font-family:'DM Mono',monospace;min-width:160px;text-align:center}
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;align-items:start}
+.day-col{background:var(--bg2);border-radius:var(--radius-lg);border:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:border-color 0.15s}
+.day-col:hover{border-color:var(--border2)}
+.day-col.today{border-color:var(--accent);border-width:1.5px}
+.day-head{padding:10px 10px 8px;border-bottom:1px solid var(--border);flex-shrink:0}
+.day-name{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3)}
+.day-num{font-size:18px;font-family:'DM Mono',monospace;color:var(--text);margin-top:1px}
+.day-col.today .day-num{color:var(--accent2)}
+.day-body{padding:6px;display:flex;flex-direction:column;gap:4px}
+.session-chip{background:var(--bg4);border-radius:6px;cursor:pointer;border:1px solid transparent;transition:all 0.15s;overflow:hidden;position:relative}
+.session-chip:hover{border-color:var(--border2)}
+.session-chip.completed{border-color:var(--green)}
+.session-chip.recurring-chip{border-left:2px solid var(--blue-light)}
+.chip-inner{padding:6px 8px}
+.chip-title{font-size:11px;font-weight:500;color:var(--text);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.chip-meta{font-size:10px;color:var(--text3);margin-top:2px}
+.chip-ex-bars{display:flex;flex-direction:column;gap:2px;padding:0 6px 6px}
+.ex-bar{border-radius:3px;display:flex;align-items:center;padding:0 5px;overflow:hidden;white-space:nowrap}
+.ex-bar-label{font-size:9px;color:rgba(255,255,255,0.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.add-session-btn{width:100%;background:transparent;border:1px dashed var(--border);border-radius:6px;padding:5px;color:var(--text3);font-size:10px;cursor:pointer;transition:all 0.15s;text-align:center;margin-top:2px}
+.add-session-btn:hover{border-color:var(--accent-dim);color:var(--accent);background:rgba(200,169,110,0.05)}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);width:100%;max-width:640px;max-height:90vh;overflow-y:auto}
+.modal-sm{max-width:440px}
+.modal-header{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.modal-header h3{font-size:16px;color:var(--text)}
+.modal-body{padding:18px 22px}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;align-items:center}
+.close-btn{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:2px 6px;border-radius:4px;line-height:1;flex-shrink:0}
+.close-btn:hover{color:var(--text);background:var(--bg3)}
+.form-group{margin-bottom:14px}
+.form-label{font-size:12px;color:var(--text2);margin-bottom:5px;display:block;letter-spacing:0.03em}
+.form-input,.form-select,.form-textarea{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:8px 11px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color 0.15s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent)}
+.form-select{cursor:pointer}
+.form-textarea{resize:vertical;min-height:70px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.divider-label{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);padding:10px 0 6px;border-top:1px solid var(--border);margin-top:10px}
+.chips-wrap{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.add-ex-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:20px;background:var(--bg4);border:1px solid var(--border);font-size:12px;cursor:pointer;transition:all 0.15s}
+.add-ex-chip:hover{border-color:var(--border2)}
+.add-ex-chip.sel{background:var(--accent-dim);border-color:var(--accent);color:var(--accent2)}
+.dot-sm{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0}
+.sess-ex-row{background:var(--bg3);border-radius:var(--radius);padding:10px 12px;border:1px solid var(--border);display:grid;grid-template-columns:1fr 72px 72px 72px 28px;gap:6px;align-items:center;margin-bottom:6px}
+.sess-ex-row.done-row{border-color:var(--green);background:rgba(74,140,92,0.08)}
+.mini-input{width:100%;background:var(--bg4);border:1px solid var(--border);border-radius:5px;padding:4px 5px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;text-align:center;outline:none}
+.mini-input:focus{border-color:var(--accent)}
+.col-h{font-size:10px;color:var(--text3);text-align:center;letter-spacing:0.06em;text-transform:uppercase}
+.col-h:first-child{text-align:left}
+.col-header{display:grid;grid-template-columns:1fr 72px 72px 72px 28px;gap:6px;padding:0 12px;margin-bottom:4px}
+.status-badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.badge-planned{background:rgba(74,106,140,0.2);color:var(--blue-light)}
+.badge-done{background:rgba(74,140,92,0.2);color:var(--green-light)}
+.badge-rec{background:rgba(122,170,200,0.15);color:var(--blue-light);border:1px solid rgba(122,170,200,0.3)}
+.progress-bar-wrap{margin-top:3px;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.progress-bar{height:100%;background:var(--green-light);border-radius:2px}
+.drag-handle{color:var(--text3);cursor:grab;font-size:13px;text-align:center;user-select:none;line-height:1}
+.ex-panel{padding:14px;background:var(--bg3);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:14px}
+.ex-bpm-big{font-family:'DM Mono',monospace;font-size:22px;color:var(--accent2)}
+.hist-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+.hist-row:last-child{border-bottom:none}
+.goal-row{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg4);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:6px}
+.goal-row-bpm{font-family:'DM Mono',monospace;font-size:13px;color:var(--accent)}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:11px 15px;font-size:13px;color:var(--text);z-index:200;opacity:0;transform:translateY(8px);transition:all 0.2s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.repeat-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.day-tog{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--bg4);color:var(--text2);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-family:'DM Sans',sans-serif}
+.day-tog:hover{border-color:var(--border2)}
+.day-tog.on{background:var(--accent-dim);border-color:var(--accent);color:var(--accent2)}
+.bpm-target-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:8px 10px;background:var(--bg4);border-radius:var(--radius);border:1px solid var(--border)}
+.daily-bpm-tag{font-family:'DM Mono',monospace;font-size:11px;padding:2px 6px;border-radius:3px;background:rgba(200,169,110,0.15);color:var(--accent);border:1px solid rgba(200,169,110,0.3)}
+</style>
+
+<div class="app" id="app">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h1>Practice Studio</h1>
+      <p>Regimen Tracker</p>
+    </div>
+    <div class="sidebar-section">Exercises</div>
+    <div class="exercise-list" id="exerciseList"></div>
+    <div class="sidebar-footer">
+      <button class="btn primary btn-full" onclick="openAddExercise()">+ Add Exercise</button>
+    </div>
+  </aside>
+  <main class="main">
+    <div class="main-header">
+      <h2 id="mainTitle">Week Overview</h2>
+      <div class="week-nav">
+        <button class="btn sm" onclick="changeWeek(-1)">&#8592;</button>
+        <span class="week-label" id="weekLabel"></span>
+        <button class="btn sm" onclick="changeWeek(1)">&#8594;</button>
+      </div>
+    </div>
+    <div class="calendar" id="calendar"></div>
+  </main>
+</div>
+
+<div class="modal-bg" id="addExModal" style="display:none">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3 id="addExTitle">New Exercise</h3>
+      <button class="close-btn" onclick="closeModal('addExModal')">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Exercise name</label>
+        <input class="form-input" id="exNameInput" placeholder="e.g. Chromatic Scale"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Starting BPM</label>
+          <input class="form-input mono" id="exBpmInput" type="number" placeholder="80"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Color</label>
+          <select class="form-select" id="exColorInput">
+            <option value="#c8a96e">Gold</option>
+            <option value="#7aaac8">Blue</option>
+            <option value="#7ab88a">Green</option>
+            <option value="#c47a7a">Red</option>
+            <option value="#a07ac4">Purple</option>
+            <option value="#c4a07a">Tan</option>
+            <option value="#7ac4b8">Teal</option>
+          </select>
+        </div>
+      </div>
+      <div class="divider-label">BPM Goal with target date</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Goal BPM</label>
+          <input class="form-input mono" id="exGoalBpmInput" type="number" placeholder="120"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Target date</label>
+          <input class="form-input" id="exGoalDateInput" type="date"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes (optional)</label>
+        <textarea class="form-textarea" id="exNotesInput" placeholder="Technique tips, focus areas..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('addExModal')">Cancel</button>
+      <button class="btn primary" onclick="saveExercise()">Save Exercise</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="sessionModal" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h3 id="sessModalTitle">Practice Session</h3>
+        <div style="margin-top:4px;display:flex;gap:8px;align-items:center" id="sessModalMeta"></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+        <span id="sessBadge"></span>
+        <button class="close-btn" onclick="closeModal('sessionModal')">&#215;</button>
+      </div>
+    </div>
+    <div class="modal-body" id="sessionModalBody"></div>
+    <div class="modal-footer" id="sessionModalFooter"></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="addSessModal" style="display:none">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3>Plan Session &mdash; <span id="addSessDateLabel"></span></h3>
+      <button class="close-btn" onclick="closeModal('addSessModal')">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Session title</label>
+        <input class="form-input" id="sessNameInput" placeholder="e.g. Morning warmup"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Add exercises</label>
+        <div class="chips-wrap" id="exChips"></div>
+        <div id="addSessExList"></div>
+      </div>
+      <div class="divider-label">Repeat schedule</div>
+      <div class="form-row" style="margin-bottom:10px">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Repeat</label>
+          <select class="form-select" id="repeatType" onchange="renderRepeatOptions()">
+            <option value="none">No repeat</option>
+            <option value="daily">Every day</option>
+            <option value="weekly">Same day weekly</option>
+            <option value="custom">Custom days</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0" id="repeatEndGroup">
+          <label class="form-label">End date</label>
+          <input class="form-input" id="repeatEndDate" type="date"/>
+        </div>
+      </div>
+      <div id="repeatCustomDays" style="display:none">
+        <div class="form-label" style="margin-bottom:6px">Days of week</div>
+        <div class="repeat-row" id="dayToggles"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('addSessModal')">Cancel</button>
+      <button class="btn primary" onclick="saveSession()">Add to Calendar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="exDetailModal" style="display:none">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3 id="exDetailTitle">Exercise Detail</h3>
+      <button class="close-btn" onclick="closeModal('exDetailModal')">&#215;</button>
+    </div>
+    <div class="modal-body" id="exDetailBody"></div>
+    <div class="modal-footer">
+      <button class="btn danger sm" onclick="deleteCurrentExercise()">Delete</button>
+      <div style="flex:1"></div>
+      <button class="btn" onclick="closeModal('exDetailModal')">Close</button>
+      <button class="btn primary" onclick="editCurrentExercise()">Edit</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DAY_NAMES=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const DAY_FULL=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+
+let state={
+  exercises:[{id:'ex-0',name:'Major Scale',bpm:80,goalBpm:120,goalDate:'',color:'#7ab88a',notes:'Practice all 12 keys. Focus on even finger pressure and consistent tone.',history:[]}],
+  sessions:[],
+  weekOffset:0
+};
+
+let editingExId=null,addSessDate=null,addSessSelectedEx=[],addSessExTimes={},currentSessId=null,currentExId=null,dragSrcIdx=null;
+
+async function loadState(){
+  try{const r=await window.storage.get('practice-state-v2');if(r&&r.value){const s=JSON.parse(r.value);if(s.exercises)state=s;}}catch(e){}
+}
+async function saveState(){
+  try{await window.storage.set('practice-state-v2',JSON.stringify(state));}catch(e){}
+}
+
+function today(){return fmtDate(new Date());}
+function fmtDate(d){return d.toISOString().split('T')[0];}
+function parseDate(s){return new Date(s+'T12:00');}
+function isToday(d){return fmtDate(d)===today();}
+
+function getDailyBpmGoal(ex,dateStr){
+  if(!ex.goalBpm||!ex.goalDate||!ex.bpm) return ex.goalBpm||ex.bpm||120;
+  const start=parseDate(today());
+  const end=parseDate(ex.goalDate);
+  const target=parseDate(dateStr);
+  const totalDays=Math.max(1,Math.round((end-start)/(1000*60*60*24)));
+  const dayIdx=Math.round((target-start)/(1000*60*60*24));
+  if(dayIdx<=0) return ex.bpm;
+  if(dayIdx>=totalDays) return ex.goalBpm;
+  const daily=ex.bpm+(ex.goalBpm-ex.bpm)*(dayIdx/totalDays);
+  return Math.round(daily);
+}
+
+function getWeekDates(offset){
+  const now=new Date();
+  const day=now.getDay();
+  const mon=new Date(now);
+  mon.setDate(now.getDate()-((day+6)%7)+offset*7);
+  return Array.from({length:7},(_,i)=>{const d=new Date(mon);d.setDate(mon.getDate()+i);return d;});
+}
+
+function renderExercises(){
+  const list=document.getElementById('exerciseList');
+  list.innerHTML='';
+  state.exercises.forEach(ex=>{
+    const hasGoal=ex.goalBpm&&ex.goalDate;
+    const div=document.createElement('div');
+    div.className='exercise-item';
+    div.innerHTML=`<div class="ex-color" style="background:${ex.color}"></div>
+      <div class="ex-info">
+        <div class="ex-name">${ex.name}</div>
+        <div class="ex-meta">${hasGoal?`Goal: ${ex.goalBpm} by ${ex.goalDate}`:`BPM: ${ex.bpm}`}</div>
+      </div>
+      <div class="ex-bpm">${ex.bpm}${hasGoal?'<span style="color:var(--text3)"> → '+ex.goalBpm+'</span>':''}</div>`;
+    div.onclick=()=>openExDetail(ex.id);
+    list.appendChild(div);
+  });
+}
+
+function renderCalendar(){
+  const dates=getWeekDates(state.weekOffset);
+  const cal=document.getElementById('calendar');
+  cal.innerHTML='';
+  const months=[...new Set(dates.map(d=>d.toLocaleDateString('en-US',{month:'short',year:'numeric'})))];
+  document.getElementById('weekLabel').textContent=months.join(' — ');
+
+  const MIN_BAR_H=14,PX_PER_MIN=2.2;
+
+  dates.forEach((d,i)=>{
+    const dateStr=fmtDate(d);
+    const sessions=state.sessions.filter(s=>s.date===dateStr);
+    const col=document.createElement('div');
+    col.className='day-col'+(isToday(d)?' today':'');
+
+    let chipsHtml=sessions.map(s=>{
+      const totalMins=(s.exercises||[]).reduce((a,e)=>a+(parseInt(e.duration)||0),0);
+      const barsHtml=(s.exercises||[]).map(se=>{
+        const ex=state.exercises.find(x=>x.id===se.id);
+        if(!ex) return '';
+        const mins=parseInt(se.duration)||10;
+        const h=Math.max(MIN_BAR_H,Math.round(mins*PX_PER_MIN));
+        return `<div class="ex-bar" style="height:${h}px;background:${ex.color}22;border-left:2px solid ${ex.color};margin-bottom:2px;border-radius:3px;padding:2px 5px">
+          <span class="ex-bar-label" style="color:${ex.color}">${ex.name} &middot; ${mins}m</span>
+        </div>`;
+      }).join('');
+      const recIcon=s.repeatId?`<span class="daily-bpm-tag" style="font-size:9px;padding:1px 4px">repeat</span> `:'';
+      return `<div class="session-chip ${s.completed?'completed':''} ${s.repeatId?'recurring-chip':''}" onclick="openSession('${s.id}')">
+        <div class="chip-inner">
+          <div class="chip-title">${recIcon}${s.name}</div>
+          <div class="chip-meta">${totalMins?totalMins+'m &middot; ':''} ${s.exercises?.length||0} ex</div>
+        </div>
+        <div class="chip-ex-bars">${barsHtml}</div>
+      </div>`;
+    }).join('');
+
+    col.innerHTML=`<div class="day-head">
+      <div class="day-name">${DAY_NAMES[i]}</div>
+      <div class="day-num">${d.getDate()}</div>
+    </div>
+    <div class="day-body">${chipsHtml}
+      <button class="add-session-btn" onclick="openAddSession('${dateStr}')">+ plan</button>
+    </div>`;
+    cal.appendChild(col);
+  });
+}
+
+function render(){renderExercises();renderCalendar();}
+function changeWeek(dir){state.weekOffset+=dir;renderCalendar();}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+function closeModal(id){document.getElementById(id).style.display='none';}
+
+function openAddExercise(exId=null){
+  editingExId=exId;
+  const ex=exId?state.exercises.find(e=>e.id===exId):null;
+  document.getElementById('addExTitle').textContent=ex?'Edit Exercise':'New Exercise';
+  document.getElementById('exNameInput').value=ex?.name||'';
+  document.getElementById('exBpmInput').value=ex?.bpm||'';
+  document.getElementById('exGoalBpmInput').value=ex?.goalBpm||'';
+  document.getElementById('exGoalDateInput').value=ex?.goalDate||'';
+  document.getElementById('exColorInput').value=ex?.color||'#c8a96e';
+  document.getElementById('exNotesInput').value=ex?.notes||'';
+  document.getElementById('addExModal').style.display='flex';
+  setTimeout(()=>document.getElementById('exNameInput').focus(),50);
+}
+
+function saveExercise(){
+  const name=document.getElementById('exNameInput').value.trim();
+  const bpm=parseInt(document.getElementById('exBpmInput').value)||0;
+  const goalBpm=parseInt(document.getElementById('exGoalBpmInput').value)||0;
+  const goalDate=document.getElementById('exGoalDateInput').value||'';
+  const color=document.getElementById('exColorInput').value;
+  const notes=document.getElementById('exNotesInput').value.trim();
+  if(!name){showToast('Name required');return;}
+  if(editingExId){
+    const ex=state.exercises.find(e=>e.id===editingExId);
+    Object.assign(ex,{name,bpm,goalBpm,goalDate,color,notes});
+  } else {
+    state.exercises.push({id:'ex-'+Date.now(),name,bpm,goalBpm,goalDate,color,notes,history:[]});
+  }
+  saveState();closeModal('addExModal');render();
+  showToast(editingExId?'Exercise updated':'Exercise added');
+}
+
+let currentExId2=null;
+function openExDetail(id){
+  currentExId=id;currentExId2=id;
+  const ex=state.exercises.find(e=>e.id===id);
+  document.getElementById('exDetailTitle').textContent=ex.name;
+  const sessions=state.sessions.filter(s=>s.exercises?.some(e=>e.id===id));
+  const history=[];
+  sessions.forEach(s=>{
+    const se=s.exercises?.find(e=>e.id===id);
+    if(se?.actualBpm) history.push({date:s.date,bpm:se.actualBpm,duration:se.duration});
+  });
+  history.sort((a,b)=>b.date.localeCompare(a.date));
+
+  const latestBpm=history.length?history[0].bpm:ex.bpm;
+  const pct=ex.goalBpm>0?Math.min(100,Math.round((latestBpm/ex.goalBpm)*100)):0;
+
+  let goalSection='';
+  if(ex.goalBpm&&ex.goalDate){
+    const daysLeft=Math.max(0,Math.round((parseDate(ex.goalDate)-new Date())/(1000*60*60*24)));
+    const todayGoal=getDailyBpmGoal(ex,today());
+    goalSection=`<div class="bpm-target-row">
+      <div style="flex:1">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:2px">Today's target BPM</div>
+        <div style="font-family:'DM Mono',monospace;font-size:18px;color:var(--accent2)">${todayGoal}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:2px">Goal by ${ex.goalDate}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:18px;color:var(--accent)">${ex.goalBpm}</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:10px">${daysLeft} days remaining &middot; +${Math.round((ex.goalBpm-ex.bpm)/Math.max(1,Math.round((parseDate(ex.goalDate)-parseDate(today()))/(1000*60*60*24))))} BPM/day needed</div>`;
+  }
+
+  const histHtml=history.length?history.slice(0,8).map(h=>`
+    <div class="hist-row">
+      <span style="color:var(--text2)">${h.date}</span>
+      <span class="mono" style="color:var(--accent)">${h.bpm} BPM</span>
+      <span style="color:var(--text3)">${h.duration||''}m</span>
+    </div>`).join(''):`<div style="color:var(--text3);font-size:13px;padding:6px 0">No recorded sessions yet</div>`;
+
+  document.getElementById('exDetailBody').innerHTML=`
+    <div class="ex-panel">
+      <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px">
+        <div style="flex:1">
+          <div style="font-size:11px;color:var(--text3)">Current BPM</div>
+          <div class="ex-bpm-big">${ex.bpm}</div>
+        </div>
+        ${ex.goalBpm?`<div style="text-align:right"><div style="font-size:11px;color:var(--text3)">Latest progress</div><div style="font-size:20px;font-family:'DM Mono',monospace;color:${pct>=100?'var(--green-light)':'var(--text)'}">${pct}%</div></div>`:''}
+      </div>
+      ${ex.notes?`<div style="font-size:13px;color:var(--text2);line-height:1.5;padding-top:8px;border-top:1px solid var(--border)">${ex.notes}</div>`:''}
+      ${ex.goalBpm?`<div class="progress-bar-wrap" style="margin-top:10px;height:4px"><div class="progress-bar" style="width:${pct}%;background:${pct>=100?'var(--green-light)':'var(--accent)'}"></div></div>`:''}
+    </div>
+    ${goalSection}
+    <div class="divider-label">Session history</div>
+    <div>${histHtml}</div>`;
+  document.getElementById('exDetailModal').style.display='flex';
+}
+function deleteCurrentExercise(){
+  if(!confirm('Delete this exercise?'))return;
+  state.exercises=state.exercises.filter(e=>e.id!==currentExId);
+  state.sessions.forEach(s=>{s.exercises=(s.exercises||[]).filter(e=>e.id!==currentExId);});
+  saveState();closeModal('exDetailModal');render();showToast('Exercise deleted');
+}
+function editCurrentExercise(){closeModal('exDetailModal');openAddExercise(currentExId);}
+
+function openAddSession(dateStr){
+  addSessDate=dateStr;addSessSelectedEx=[];addSessExTimes={};
+  document.getElementById('addSessDateLabel').textContent=parseDate(dateStr).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  document.getElementById('sessNameInput').value='';
+  document.getElementById('repeatType').value='none';
+  document.getElementById('repeatEndDate').value='';
+  document.getElementById('repeatCustomDays').style.display='none';
+  renderDayToggles([]);
+  renderExChips();
+  document.getElementById('addSessModal').style.display='flex';
+}
+
+let customDays=[];
+function renderDayToggles(sel){
+  customDays=sel;
+  const wrap=document.getElementById('dayToggles');
+  wrap.innerHTML=DAY_NAMES.map((n,i)=>`<div class="day-tog ${customDays.includes(i)?'on':''}" onclick="toggleDay(${i})">${n[0]}</div>`).join('');
+}
+function toggleDay(i){
+  customDays=customDays.includes(i)?customDays.filter(x=>x!==i):[...customDays,i];
+  renderDayToggles(customDays);
+}
+function renderRepeatOptions(){
+  const v=document.getElementById('repeatType').value;
+  const cust=document.getElementById('repeatCustomDays');
+  cust.style.display=v==='custom'?'block':'none';
+  if(v==='custom') renderDayToggles(customDays);
+}
+
+function renderExChips(){
+  const wrap=document.getElementById('exChips');
+  wrap.innerHTML=state.exercises.map(ex=>
+    `<span class="add-ex-chip ${addSessSelectedEx.includes(ex.id)?'sel':''}" onclick="toggleAddEx('${ex.id}')">
+      <span class="dot-sm" style="background:${ex.color}"></span>${ex.name}
+    </span>`).join('');
+  const listEl=document.getElementById('addSessExList');
+  if(!addSessSelectedEx.length){listEl.innerHTML='';return;}
+  listEl.innerHTML=`<div class="form-label" style="margin-bottom:6px">Duration per exercise (minutes)</div>`+
+    addSessSelectedEx.map(id=>{
+      const ex=state.exercises.find(e=>e.id===id);
+      return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span class="dot-sm" style="background:${ex.color}"></span>
+        <span style="flex:1;font-size:13px">${ex.name}</span>
+        <input class="form-input mono" style="width:65px;text-align:center" type="number" min="1" max="180" value="${addSessExTimes[id]||15}" oninput="addSessExTimes['${id}']=this.value"/>
+        <span style="font-size:11px;color:var(--text3)">min</span>
+      </div>`;
+    }).join('');
+}
+function toggleAddEx(id){
+  addSessSelectedEx=addSessSelectedEx.includes(id)?addSessSelectedEx.filter(x=>x!==id):[...addSessSelectedEx,id];
+  if(!addSessExTimes[id]) addSessExTimes[id]=15;
+  renderExChips();
+}
+
+function generateDates(startStr,repeatType,endStr,customDays,startDow){
+  const dates=[startStr];
+  if(repeatType==='none'||!endStr) return dates;
+  const end=parseDate(endStr);
+  let cur=parseDate(startStr);
+  while(true){
+    cur=new Date(cur);cur.setDate(cur.getDate()+1);
+    if(cur>end) break;
+    const dow=(cur.getDay()+6)%7;
+    if(repeatType==='daily') dates.push(fmtDate(cur));
+    else if(repeatType==='weekly'&&dow===startDow) dates.push(fmtDate(cur));
+    else if(repeatType==='custom'&&customDays.includes(dow)) dates.push(fmtDate(cur));
+  }
+  return dates;
+}
+
+function saveSession(){
+  const name=document.getElementById('sessNameInput').value.trim()||'Practice Session';
+  const exercises=addSessSelectedEx.map(id=>({id,duration:parseInt(addSessExTimes[id])||15,bpmGoal:getDailyBpmGoal(state.exercises.find(e=>e.id===id),addSessDate)}));
+  const repeatType=document.getElementById('repeatType').value;
+  const endStr=document.getElementById('repeatEndDate').value;
+  const startDow=(parseDate(addSessDate).getDay()+6)%7;
+  const dates=generateDates(addSessDate,repeatType,endStr,customDays,startDow);
+  const repeatId=repeatType!=='none'&&dates.length>1?'rep-'+Date.now():null;
+  dates.forEach(dateStr=>{
+    const dayExercises=exercises.map(e=>({...e,bpmGoal:getDailyBpmGoal(state.exercises.find(x=>x.id===e.id),dateStr)}));
+    state.sessions.push({id:'sess-'+Date.now()+'-'+Math.random().toString(36).slice(2),date:dateStr,name,exercises:dayExercises,completed:false,repeatId});
+  });
+  saveState();closeModal('addSessModal');renderCalendar();
+  showToast(dates.length>1?`${dates.length} sessions planned`:'Session planned');
+}
+
+function openSession(id){
+  currentSessId=id;
+  const sess=state.sessions.find(s=>s.id===id);
+  document.getElementById('sessModalTitle').textContent=sess.name;
+  const recTag=sess.repeatId?`<span class="badge-rec status-badge" style="font-size:10px">recurring</span>`:'';
+  document.getElementById('sessModalMeta').innerHTML=`<span style="font-size:12px;color:var(--text3)">${parseDate(sess.date).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}</span>${recTag}`;
+  document.getElementById('sessBadge').innerHTML=`<span class="status-badge ${sess.completed?'badge-done':'badge-planned'}">${sess.completed?'Completed':'Planned'}</span>`;
+  renderSessionBody(sess);
+  document.getElementById('sessionModal').style.display='flex';
+}
+
+function renderSessionBody(sess){
+  const isComp=sess.completed;
+  const exRows=(sess.exercises||[]).map((se,i)=>{
+    const ex=state.exercises.find(e=>e.id===se.id);
+    if(!ex) return '';
+    const pct=se.actualBpm?Math.min(100,Math.round((se.actualBpm/se.bpmGoal)*100)):0;
+    const dailyTag=ex.goalBpm&&ex.goalDate?`<span class="daily-bpm-tag">${se.bpmGoal} today</span>`:'';
+    return `<div class="sess-ex-row ${se.actualBpm?'done-row':''}">
+      <div>
+        <div style="font-size:13px;font-weight:500;color:var(--text);display:flex;align-items:center;gap:6px">
+          <span class="dot-sm" style="background:${ex.color}"></span>${ex.name}
+        </div>
+        ${dailyTag}
+        ${se.actualBpm?`<div class="progress-bar-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>`:''}
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em">Goal</div>
+        <input class="mini-input" type="number" value="${se.bpmGoal}" onchange="updateSessEx('${sess.id}',${i},'bpmGoal',this.value)"/>
+      </div>
+      ${isComp
+        ?`<div style="text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em">Actual</div><div class="mono" style="font-size:13px;color:${se.actualBpm?'var(--green-light)':'var(--text3)'}">${se.actualBpm||'—'}</div></div>`
+        :`<div style="text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em">BPM</div><input class="mini-input" type="number" value="${se.bpmGoal}" onchange="updateSessEx('${sess.id}',${i},'bpmGoal',this.value)"/></div>`
+      }
+      <div style="text-align:center">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em">Min</div>
+        <input class="mini-input" type="number" value="${se.duration||15}" onchange="updateSessEx('${sess.id}',${i},'duration',this.value);renderCalendar()"/>
+      </div>
+      ${isComp?'<div></div>':`<div class="drag-handle" draggable="true" ondragstart="dragStart(event,${i})" ondragover="dragOver(event)" ondrop="dropEx(event,'${sess.id}',${i})" ondragend="dragEnd()">&#8942;</div>`}
+    </div>`;
+  }).join('');
+
+  let recordSect='';
+  if(isComp){
+    recordSect=`<div class="divider-label">Record actual BPM</div>
+      ${(sess.exercises||[]).map((se,i)=>{
+        const ex=state.exercises.find(e=>e.id===se.id);
+        return ex?`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <span class="dot-sm" style="background:${ex.color}"></span>
+          <span style="flex:1;font-size:13px">${ex.name}</span>
+          <input class="form-input mono" style="width:75px;text-align:center" type="number" placeholder="${se.bpmGoal}" value="${se.actualBpm||''}" oninput="updateSessEx('${sess.id}',${i},'actualBpm',this.value)"/>
+          <span style="font-size:12px;color:var(--text3)">BPM</span>
+        </div>`:'';
+      }).join('')}`;
+  }
+
+  document.getElementById('sessionModalBody').innerHTML=`
+    <div class="col-header">
+      <div class="col-h">Exercise</div>
+      <div class="col-h">Goal</div>
+      <div class="col-h">${isComp?'Actual':'Set'}</div>
+      <div class="col-h">Min</div>
+      <div></div>
+    </div>
+    ${exRows}${recordSect}`;
+
+  const recButtons=sess.repeatId?`<button class="btn danger sm" onclick="deleteRepeat('${sess.id}')">Delete all repeats</button>`:'';
+  document.getElementById('sessionModalFooter').innerHTML=`
+    <button class="btn danger sm" onclick="deleteSession('${sess.id}')">Delete</button>
+    ${recButtons}
+    <div style="flex:1"></div>
+    ${isComp
+      ?`<button class="btn" onclick="toggleComplete('${sess.id}',false)">Unmark</button>`
+      :`<button class="btn primary" onclick="toggleComplete('${sess.id}',true)">Mark Complete</button>`
+    }
+    <button class="btn" onclick="closeModal('sessionModal')">Close</button>`;
+}
+
+function updateSessEx(sessId,idx,field,val){
+  const sess=state.sessions.find(s=>s.id===sessId);
+  if(!sess||!sess.exercises[idx]) return;
+  sess.exercises[idx][field]=(['duration','bpmGoal','actualBpm'].includes(field))?parseInt(val)||0:val;
+  saveState();
+}
+function toggleComplete(sessId,complete){
+  const sess=state.sessions.find(s=>s.id===sessId);
+  sess.completed=complete;
+  saveState();renderCalendar();renderSessionBody(sess);
+  document.getElementById('sessBadge').innerHTML=`<span class="status-badge ${complete?'badge-done':'badge-planned'}">${complete?'Completed':'Planned'}</span>`;
+  showToast(complete?'Session complete!':'Marked as planned');
+}
+function deleteSession(id){
+  if(!confirm('Delete this session?'))return;
+  state.sessions=state.sessions.filter(s=>s.id!==id);
+  saveState();closeModal('sessionModal');renderCalendar();showToast('Session removed');
+}
+function deleteRepeat(id){
+  const sess=state.sessions.find(s=>s.id===id);
+  const rid=sess.repeatId;
+  if(!rid||!confirm('Delete all sessions in this repeat series?'))return;
+  state.sessions=state.sessions.filter(s=>s.repeatId!==rid);
+  saveState();closeModal('sessionModal');renderCalendar();showToast('Repeat series deleted');
+}
+function dragStart(e,i){dragSrcIdx=i;e.dataTransfer.effectAllowed='move';}
+function dragOver(e){e.preventDefault();}
+function dragEnd(){dragSrcIdx=null;}
+function dropEx(e,sessId,toIdx){
+  e.preventDefault();
+  if(dragSrcIdx===null||dragSrcIdx===toIdx)return;
+  const sess=state.sessions.find(s=>s.id===sessId);
+  const arr=sess.exercises;
+  const [item]=arr.splice(dragSrcIdx,1);
+  arr.splice(toIdx,0,item);
+  saveState();renderSessionBody(sess);
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    ['addExModal','sessionModal','addSessModal','exDetailModal'].forEach(id=>{
+      if(document.getElementById(id).style.display!=='none') closeModal(id);
+    });
+  }
+});
+
+(async()=>{await loadState();render();})();
+</script>
